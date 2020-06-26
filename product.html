@@ -1,0 +1,246 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<link rel='stylesheet' href='./style.css' type='text/css'/>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script type="text/javascript" src="./lib/bignumber.min.js"></script>
+	<script type="text/javascript" src="./lib/web3-light.js"></script>
+	<script type="text/javascript" src="./contractabi.js"></script>
+	<script type="text/javascript">
+	
+		console.log('starting...');
+		//connect web3 and check if web3 is connected correctly
+		if (typeof web3 !== 'undefined') {
+			web3 = new Web3(web3.currentProvider);
+		} else {
+			// set the provider you want from Web3.providers
+			web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+		}
+
+		if (web3.isConnected()) {
+			console.log("connected");
+		} else {
+			console.log("not connected");
+			//throw new Error('Error');
+			exit;
+		}
+
+		var contractAddress = "0x221ecd8707dc678e07a02b34a9884a7aaa987306";
+		var vc = web3.eth.contract(abi).at(contractAddress);
+
+		function showList(){
+			var M_table = document.getElementById("table1");
+			var length = vc.getNumOfProducts();
+			M_table.insertRow();
+			
+			var row = M_table.insertRow();
+				var cell1 = row.insertCell(0);
+				var cell2 = row.insertCell(1);
+				var cell3 = row.insertCell(2);
+				var cell4 = row.insertCell(3);
+				cell1.innerHTML = "1";
+				cell2.innerHTML = "2";
+				cell3.innerHTML = "3";
+				cell4.style.width ="60%";
+		}
+		function showAllList() {
+			var table = document.getElementById("table4");
+			
+			console.log("showAllList");
+			
+			var length = vc.getNumOfProducts();
+			
+			console.log("length: ", length);
+			
+			
+			for (var i = 0; i < length; i++) {
+				var product = vc.getProductStruct(i);
+				var toString = product.toString();
+				 console.log("product: " + toString);
+				var strArray = toString.split(",");
+
+				//var timestamp = new Date(strArray[3]*1000);
+				//console.log("timestamp: " + timestamp);
+				//console.log("timestamp: " + strArray[3]*1000);
+
+				var row = table.insertRow();
+				var cell1 = row.insertCell(0);
+				var cell2 = row.insertCell(1);
+				var cell3 = row.insertCell(2);
+				var cell4 = row.insertCell(3);
+				var cell5 = row.insertCell(4);
+				var cell6 = row.insertCell(5);
+				var cell7 = row.insertCell(6);
+				cell1.innerHTML = strArray[0];
+				cell2.innerHTML = strArray[1];
+				cell3.innerHTML = strArray[2];
+				cell4.innerHTML = strArray[4];
+				cell4.innerHTML = strArray[5];
+				cell4.innerHTML = strArray[6];
+				<!-- cell4.innerHTML = strArray[7]; -->
+				//cell4.innerHTML = timestamp;
+			}
+		}
+
+		function supplyProduct() {
+         //약국
+		 var mName = document.getElementById("medicine").value;
+         var supplyNum = document.getElementById("supplyNum").value;
+		var parName = document.getElementById("b_parmacy").value;
+         var busiName = document.getElementById("busiName").value;
+		var account = document.getElementById("account").value;
+		 
+         if (web3.personal.unlockAccount(account, document.getElementById('pass').value)) {
+            vc.addsupplyProStru(mName,parName,busiName,supplyNum, { from: account, gas: 2000000 }, function (err, result) {
+               if (!err) alert("트랜잭션이 성공적으로 전송되었습니다.\n" + result) 
+            });
+         //if (web3.personal.unlockAccount(account, document.getElementById('pass').value)) {
+         //   vc.addProStru(pronumber,proname,proloc, { from: account, gas: 2000000 }, function (err, result) {
+         //      if (!err) alert("트랜잭션이 성공적으로 전송되었습니다.\n" + result) 
+         //   });
+         }
+      }
+		  function sellProduct() {
+			var mName = document.getElementById("medicine").value;
+			var parName = document.getElementById("b_parmacy").value;
+			var sellNum = document.getElementById("sellNum").value;
+			var account = document.getElementById("account").value;
+			if (web3.personal.unlockAccount(account, document.getElementById('pass').value)) {
+            vc.addsellProStru(mName,parName,sellNum, { from: account, gas: 2000000 }, function (err, result) {
+            if (!err) alert("트랜잭션이 성공적으로 전송되었습니다.\n" + result) 
+            });
+			
+		  }
+	}
+		  function discardProduct() {
+			var mName = document.getElementById("medicine").value;
+			var parName = document.getElementById("b_parmacy").value;
+			var discardNum = document.getElementById("LetDiscardNum").value;
+			var account = document.getElementById("account").value;
+			if (web3.personal.unlockAccount(account, document.getElementById('pass').value)) {
+            vc.adddiscardProStru(mName,parName,discardNum, { from: account, gas: 2000000 }, function (err, result) {
+            if (!err) alert("트랜잭션이 성공적으로 전송되었습니다.\n" + result) 
+            });
+		  
+		  }
+	  }
+   </script>
+</head>
+
+<body align="center">
+   <h1> 약품 재고 현황 </h1>
+   <div>
+      계정:
+      <input type="text" id="account" value="0x38585e63492d8ec6b1564dfe1f0fdc249b3f06bf">
+      <p></p>
+      패스워드:
+      <input type="password" id="pass" value="eth"> </div>
+   <br>
+   <div>
+      <br></br>
+	  
+      <input type="text" id="medicine" placeholder="약품명" >
+      <input type="text" id="b_parmacy" placeholder="약국명">
+	  <input type="text" id="busiName" placeholder="제조업체 명">
+      <input type="text" id="supplyNum" placeholder="공급개수">
+	  <button onClick="supplyProduct()">공급</button>
+	  <br></br>
+      <input type="text" id="medicine" placeholder="약품명" >
+      <input type="text" id="b_parmacy" placeholder="약국명">
+      <input type="text" id="sellNum" placeholder="판매개수">
+	  <button onClick="sellProduct()">판매</button>
+      <br></br>
+	  <input type="text" id="medicine" placeholder="약품명" >
+      <input type="text" id="b_parmacy" placeholder="약국명">
+      <input type="text" id="LetdiscardNum" placeholder="폐기개수">
+	  <button onClick="discardProduct()">폐기</button>
+      <br></br><br></br>
+      [ 약국 ]
+	  <br></br>
+	   <table border="1" width = "800" height="100" align="center" id = "table1"/>
+	   <th>약품명</th>
+	   <th>공급 수량</th>
+	   <th>판매 수량</th>
+	   <th>폐기 수량</th>
+	   <th>제조업체 명</th>
+
+    </table>
+	  <br></br><br></br>
+	  
+	  [ 제조업체1 ]
+	  <br></br>
+	   <table width = "100%" align="center" id "table2"/>
+	   <th>약품 명</th>
+	   <th>약국 명</th>
+	   <th>공급 수량</th>
+
+    </table>
+	</table>
+	  <br></br><br></br>
+	  
+	  [ 제조업체2 ]
+	  <br></br>
+	   <table width = "100%" align="center" id = "table3" />
+	   <th>약품 명</th>
+	   <th>약국 명</th>
+	   <th>공급 수량</th>
+
+    </table>
+	  
+	  <br></br>
+      
+	  <br></br>
+	  <br></br>
+	  
+	  [[ Total Data ]]
+	  <br></br>
+	   <table width = "100%" align="center" id = "table4" />
+	   <th>약품 명</th>
+	   <th>약국 명</th>
+	   <th>공급 수량</th>
+	   <th>판매 수량</th>
+	   <th>폐기 수량</th>
+	   <th>제조업체 명</th>
+	   <th>재고</th>
+
+
+		   
+
+    </table>
+	
+	  <!--
+	  <br></br><br></br>
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;약품명  
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;공급수량
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;판매수량
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;폐기수량
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;제조업체명
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;재고
+	  <input type="text" id="medicine" placeholder="약품명" value=타이레놀>
+      <input type="text" id="supplyNum" placeholder="공급 수량" value=1>
+      <input type="text" id="sellNum" placeholder="판매 수량" value=1>
+      <input type="text" id="discardNum" placeholder="폐기 수량" value=1>
+      <input type="text" id="busiName" placeholder="제조업체 명" value=제조업체1>
+      <input type="text" id="stockNum" placeholder="재고" value=1>
+	  <button onClick="addProduct()">제품 등록하기</button>-->
+      
+	  
+	  <br></br>
+	  <br></br>
+	  <br></br>
+	  <table style="width:100%" id="table1" />
+   </div>
+   
+   <script>
+	  //showList();
+      showAllList();
+   </script>
+</body>
+</html>
